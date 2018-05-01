@@ -17,6 +17,11 @@ $api = new Salesforce();
 
 $bdone = false;
 
+$commandMap = [
+    'u' => 'Usage',
+    'usage' => 'Usage'
+];
+
 $exits = ['q', 'exit', 'quit'];
 while (!$bdone) {
     $line = readline('>');
@@ -27,6 +32,17 @@ while (!$bdone) {
     if (in_array($line, $exits)) {
         $bdone = true;
     } else {
-        //TODO
+        $fields = explode(' ', $line);
+        $cmd = $fields[0];
+
+        $cmdClass = $commandMap[$cmd];
+
+        if (empty($cmdClass)) {
+            echo "Command not found\n";
+            continue;
+        }
+
+        $class = "SFR\\Commands\\$cmdClass";
+        $class::run($api, $fields);
     }
 }

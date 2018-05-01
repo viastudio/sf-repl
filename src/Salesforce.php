@@ -26,8 +26,12 @@ class Salesforce {
      * Get current Daily API request data from Salesforce
      * @return array    The important properties of the response are `Max` and `Remaining`
      */
-    public function usage($type = 'DailyApiRequests') {
+    public function usage($type = '') {
         list($code, $data) = $this->get('/services/data/v37.0/limits');
+
+        if (empty($type)) {
+            return $data;
+        }
 
         return $data[$type];
     }
