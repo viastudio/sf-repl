@@ -19,7 +19,9 @@ $bdone = false;
 
 $commandMap = [
     'u' => 'Usage',
-    'usage' => 'Usage'
+    'usage' => 'Usage',
+    'o' => 'Object',
+    'object' => 'Object',
 ];
 
 $exits = ['q', 'exit', 'quit'];
@@ -32,6 +34,10 @@ while (!$bdone) {
     if (in_array($line, $exits)) {
         $bdone = true;
     } else {
+        if (empty($line)) {
+            continue;
+        }
+
         $fields = explode(' ', $line);
         $cmd = $fields[0];
 
