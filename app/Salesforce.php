@@ -13,13 +13,18 @@ class Salesforce {
     /**
      * @param bool $authSoap - If false, don't authenticate against the SOAP api (default = true)
      */
-    public function __construct($authSoap = true) {
+    public function __construct($opts, $authSoap = false) {
+        $this->opts = $opts;
         $this->client = new Client();
         $this->auth();
 
         if ($authSoap) {
             $this->auth_soap();
         }
+    }
+
+    private function getenv($name) {
+        return $this->opts[$name];
     }
 
     /**
@@ -106,10 +111,10 @@ class Salesforce {
      * @throws \Exception
      */
     private function auth() {
-        $salesforceUser = getenv('SALESFORCE_USER');
-        $salesforcePass = getenv('SALESFORCE_PASS');
-        $salesforceKey = getenv('SALESFORCE_CONSUMER_KEY');
-        $salesforceSecret = getenv('SALESFORCE_CONSUMER_SECRET');
+        $salesforceUser = $this->getenv('salesforce_user');
+        $salesforcePass = $this->getenv('salesforce_pass');
+        $salesforceKey = $this->getenv('salesforce_consumer_key');
+        $salesforceSecret = $this->getenv('salesforce_consumer_secret');
 
         $params = [
             'grant_type' => 'password',
@@ -146,9 +151,9 @@ class Salesforce {
      * @throws \Exception
      */
     private function auth_soap() {
-        $salesforceUser = getenv('SALESFORCE_USER');
-        $salesforcePass = getenv('SALESFORCE_PASS');
-        $salesforceToken = getenv('SALESFORCE_SECURITY_TOKEN');
+        $salesforceUser = $this->getenv('salesforce_user');
+        $salesforcePass = $this->getenv('salesforce_pass');
+        $salesforceToken = $this->getenv('salesforce_security_token');
 
         $payload = <<<EOT
 <?xml version="1.0" encoding="utf-8" ?>

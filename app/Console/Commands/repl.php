@@ -73,10 +73,25 @@ class repl extends Command {
         }
     }
 
+    private function getOpts() {
+        return [
+            'salesforce_user' => $this->salesforce_user,
+            'salesforce_pass' => $this->salesforce_pass,
+            'salesforce_consumer_key' => $this->salesforce_consumer_key,
+            'salesforce_consumer_secret' => $this->salesforce_consumer_secret,
+            'salesforce_security_token' => $this->salesforce_security_token,
+        ];
+    }
+
+    private function initSalesforceApi() {
+        $this->api = new Salesforce($this->getOpts());
+    }
+
     public function handle() {
         try {
             $this->validate();
             $this->createVars($this->parseConfig());
+            $this->initSalesforceApi();
         } catch (\App\Exceptions\InvalidConfigException $e) {
             $this->error($e->getMessage());
         } catch (\Exception $e) {
@@ -85,12 +100,6 @@ class repl extends Command {
     }
 
     public function __toString() {
-        return print_r([
-            'salesforce_user' => $this->salesforce_user,
-            'salesforce_pass' => $this->salesforce_pass,
-            'salesforce_consumer_key' => $this->salesforce_consumer_key,
-            'salesforce_consumer_secret' => $this->salesforce_consumer_secret,
-            'salesforce_security_token' => $this->salesforce_security_token,
-        ], true);
+        return print_r($this->getOpts(), true);
     }
 }
