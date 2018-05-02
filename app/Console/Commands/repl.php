@@ -87,11 +87,37 @@ class repl extends Command {
         $this->api = new Salesforce($this->getOpts());
     }
 
+    private function cmdIsExit($line) {
+        $exits = ['q', 'exit', 'quit'];
+
+        return in_array($line, $exits);
+    }
+
+    private function repl() {
+        $bdone = false;
+
+        while (!$bdone) {
+            $line = readline('>');
+            if (empty($line)) {
+                continue;
+            }
+
+            if ($this->cmdIsExit($line)) {
+                $bdone = true;
+                continue;
+            }
+
+            readline_add_history($line);
+        }
+    }
+
     public function handle() {
         try {
             $this->validate();
             $this->createVars($this->parseConfig());
             $this->initSalesforceApi();
+
+            $this->repl();
         } catch (\App\Exceptions\InvalidConfigException $e) {
             $this->error($e->getMessage());
         } catch (\Exception $e) {
