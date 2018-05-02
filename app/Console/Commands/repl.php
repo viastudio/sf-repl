@@ -57,10 +57,6 @@ class repl extends Command {
                 $map[$alias] = $className;
             }
         }
-
-        $this->info(print_r($map, true));
-
-        die();
     }
 
     private function validate() {
@@ -127,19 +123,23 @@ class repl extends Command {
         $bdone = false;
 
         while (!$bdone) {
-            $line = readline('>');
-            if (empty($line)) {
-                continue;
+            try {
+                $line = readline('>');
+                if (empty($line)) {
+                    continue;
+                }
+
+                if ($this->cmdIsExit($line)) {
+                    $bdone = true;
+                    continue;
+                }
+
+                readline_add_history($line);
+
+                $ret = $this->parseCommand($line);
+            } catch (\Exception $e) {
+                $this->error($e->getMessage());
             }
-
-            if ($this->cmdIsExit($line)) {
-                $bdone = true;
-                continue;
-            }
-
-            readline_add_history($line);
-
-            $ret = $this->parseCommand($line);
         }
     }
 
