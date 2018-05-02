@@ -29,8 +29,38 @@ class repl extends Command {
     public function __construct() {
         parent::__construct();
 
-        $this->mePath = __DIR__ . '/../../../';
+        $this->mePath = __DIR__ . '/../../..';
         $this->defaultConfig = "{$this->mePath}/config.ini";
+    }
+
+    private function parseCommand($line) {
+        $fields = explode(' ', $line);
+
+        return [
+            'command' => $fields[0],
+            'fields' => array_slice($fields, 1),
+        ];
+    }
+
+    private function buildCommandMap() {
+        $map = [];
+        $files = glob("{$this->mePath}/app/Commands/*.php");
+
+        foreach ($files as $file) {
+            $pathinfo = pathinfo($file);
+            $className = $pathinfo['filename'];
+            $class = "\\App\\Commands\\$className";
+
+            $cmd = new $class();
+
+            foreach ($class::aliases() as $alias) {
+                $map[$alias] = $className;
+            }
+        }
+
+        $this->info(print_r($map, true));
+
+        die();
     }
 
     private function validate() {
@@ -108,6 +138,8 @@ class repl extends Command {
             }
 
             readline_add_history($line);
+
+            $ret = $this->parseCommand($line);
         }
     }
 
@@ -116,6 +148,7 @@ class repl extends Command {
             $this->validate();
             $this->createVars($this->parseConfig());
             $this->initSalesforceApi();
+            $this->buildCommandMap();
 
             $this->repl();
         } catch (\App\Exceptions\InvalidConfigException $e) {
