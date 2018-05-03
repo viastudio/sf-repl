@@ -44,13 +44,19 @@ class repl extends Command {
     }
 
     private function parseCommand($line) {
-        $pipes = explode('|', $line);
-        $fields = explode(' ', $pipes[0]);
+        $pipe = null;
+        $pipeIdx = strpos($line, '|');
+        if ($pipeIdx !== false) {
+            $pipe = substr($line, $pipeIdx);
+            $line = substr($line, 0, $pipeIdx - 1);
+        }
+
+        $fields = explode(' ', $line);
 
         return [
             'command' => $fields[0],
             'fields' => array_slice($fields, 1),
-            'pipe' => count($pipes) > 1 ? $pipes[1] : null
+            'pipe' => $pipe
         ];
     }
 
@@ -170,10 +176,21 @@ class repl extends Command {
 
                 $cmd = new $this->commandMap[$ret['command']]($this->api);
                 $resp = $cmd->run($ret['fields'], $this);
-                $json = json_encode($resp, JSON_PRETTY_PRINT);
 
                 if (isset($ret['pipe'])) {
-                    $json = shell_exec("echo '$json' | {$ret['pipe']}");
+                    $json = json_encode($resp);
+
+                    //There can be issues directly outputting large json blos with echo and piping them to whatever command
+                    //So we write the json payload to a temp file and cat it to the pipe command
+                    $temp = tempnam('/tmp', 'sfr_');
+                    file_put_contents($temp, $json);
+
+                    $cmd = "cat $temp {$ret['pipe']}";
+                    $json = shell_exec($cmd);
+
+                    unlink($temp);
+                } else {
+                    $json = json_encode($resp, JSON_PRETTY_PRINT);
                 }
 
                 $this->line($json);
