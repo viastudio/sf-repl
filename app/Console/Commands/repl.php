@@ -31,7 +31,16 @@ class repl extends Command {
 
         $this->mePath = __DIR__ . '/../../..';
         $this->defaultConfig = "{$this->mePath}/config.ini";
+        $this->historyFile = "{$this->mePath}/.history";
         $this->commandMap = $this->buildCommandMap();
+    }
+
+    private function writeHistory() {
+        readline_write_history($this->historyFile);
+    }
+
+    private function readHistory() {
+        readline_read_history($this->historyFile);
     }
 
     private function parseCommand($line) {
@@ -141,7 +150,7 @@ class repl extends Command {
                 $line = readline('>');
 
                 if ($this->cmdIsExit($line)) {
-                    //TODO - save history http://php.net/manual/en/function.readline-write-history.php
+                    $this->writeHistory();
                     $bdone = true;
                     continue;
                 }
@@ -179,6 +188,7 @@ class repl extends Command {
             $this->validate();
             $this->createVars($this->parseConfig());
             $this->initSalesforceApi();
+            $this->readHistory();
 
             $this->repl();
         } catch (\App\Exceptions\InvalidConfigException $e) {
