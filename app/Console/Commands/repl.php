@@ -35,11 +35,13 @@ class repl extends Command {
     }
 
     private function parseCommand($line) {
-        $fields = explode(' ', $line);
+        $pipes = explode('|', $line);
+        $fields = explode(' ', $pipes[0]);
 
         return [
             'command' => $fields[0],
             'fields' => array_slice($fields, 1),
+            'pipe' => count($pipes) > 1 ? $pipes[1] : null
         ];
     }
 
@@ -158,9 +160,14 @@ class repl extends Command {
                 }
 
                 $cmd = new $this->commandMap[$ret['command']]($this->api);
-                $ret = $cmd->run($ret['fields'], $this);
+                $resp = $cmd->run($ret['fields'], $this);
+                $json = json_encode($resp, JSON_PRETTY_PRINT);
 
-                $this->line($ret);
+                if (isset($ret['pipe'])) {
+                    $json = shell_exec("echo '$json' | {$ret['pipe']}");
+                }
+
+                $this->line($json);
             } catch (\Exception $e) {
                 $this->error($e->getMessage());
             }
