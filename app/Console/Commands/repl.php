@@ -127,7 +127,7 @@ class repl extends Command {
     private function cmdIsExit($line) {
         $exits = ['q', 'exit', 'quit'];
 
-        return in_array($line, $exits);
+        return in_array($line, $exits) || $line === false;
     }
 
     private function repl() {
@@ -135,13 +135,17 @@ class repl extends Command {
 
         while (!$bdone) {
             try {
+                //TODO - tab completion? http://php.net/manual/en/function.readline-completion-function.php
                 $line = readline('>');
-                if (empty($line)) {
+
+                if ($this->cmdIsExit($line)) {
+                    //TODO - save history http://php.net/manual/en/function.readline-write-history.php
+                    $bdone = true;
                     continue;
                 }
 
-                if ($this->cmdIsExit($line)) {
-                    $bdone = true;
+                if (empty($line)) {
+                    readline_redisplay();
                     continue;
                 }
 
@@ -154,7 +158,9 @@ class repl extends Command {
                 }
 
                 $cmd = new $this->commandMap[$ret['command']]($this->api);
-                $cmd->run($ret['fields'], $this);
+                $ret = $cmd->run($ret['fields'], $this);
+
+                $this->line($ret);
             } catch (\Exception $e) {
                 $this->error($e->getMessage());
             }
