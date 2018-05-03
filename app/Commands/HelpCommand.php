@@ -17,6 +17,9 @@ class HelpCommand extends AbstractCommand {
         //
     }
 
+    /**
+     * Gather up all the Commands help & title text and display it as a table
+     */
     public function run($fields = null, $parent = null) {
         $headers = ['Command', 'Description'];
         $commands = [];

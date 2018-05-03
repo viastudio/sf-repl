@@ -1,6 +1,9 @@
 <?php
 namespace App\Commands;
 
+/**
+ * Clear the readline history
+ */
 class ClearCommand extends AbstractCommand {
     protected $helpText = 'clear - Clear the command history';
     protected $titleText = 'Clear';

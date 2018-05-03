@@ -16,6 +16,9 @@ class ObjectCommand extends AbstractCommand {
         $this->api = $api;
     }
 
+    /**
+     * Either return the details of a specific object, a list of all sobjects, or the description of an sobject
+     */
     public function run($fields = null, $parent = null) {
         $url = "/services/data/v42.0/sobjects";
 

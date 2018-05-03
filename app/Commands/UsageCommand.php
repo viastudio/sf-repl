@@ -1,6 +1,9 @@
 <?php
 namespace App\Commands;
 
+/**
+ * Return information about Salesforce REST API usage
+ */
 class UsageCommand extends AbstractCommand {
     protected $helpText = "u [field] - Display Salesforce API usage information (limited to 'field', if specified)";
     protected $titleText = 'Usage';
