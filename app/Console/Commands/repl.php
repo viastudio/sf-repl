@@ -31,6 +31,7 @@ class repl extends Command {
 
         $this->mePath = __DIR__ . '/../../..';
         $this->defaultConfig = "{$this->mePath}/config.ini";
+        $this->commandMap = $this->buildCommandMap();
     }
 
     private function parseCommand($line) {
@@ -47,16 +48,26 @@ class repl extends Command {
         $files = glob("{$this->mePath}/app/Commands/*.php");
 
         foreach ($files as $file) {
+            if (strpos($file, 'AbstractCommand') !== false) {
+                continue;
+            }
+
             $pathinfo = pathinfo($file);
             $className = $pathinfo['filename'];
             $class = "\\App\\Commands\\$className";
 
             $cmd = new $class();
 
-            foreach ($class::aliases() as $alias) {
-                $map[$alias] = $className;
+            foreach ($cmd->aliases() as $alias) {
+                $map[$alias] = $class;
             }
         }
+
+        return $map;
+    }
+
+    private function commandExists($command) {
+        return isset($this->commandMap[$command]);
     }
 
     private function validate() {
@@ -137,6 +148,13 @@ class repl extends Command {
                 readline_add_history($line);
 
                 $ret = $this->parseCommand($line);
+
+                if (!$this->commandExists($ret['command'])) {
+                    throw new \Exception("Command '{$ret['command']}' not found");
+                }
+
+                $cmd = new $this->commandMap[$ret['command']]($this->api);
+                $cmd->run($ret['fields'], $this);
             } catch (\Exception $e) {
                 $this->error($e->getMessage());
             }
@@ -148,7 +166,6 @@ class repl extends Command {
             $this->validate();
             $this->createVars($this->parseConfig());
             $this->initSalesforceApi();
-            $this->buildCommandMap();
 
             $this->repl();
         } catch (\App\Exceptions\InvalidConfigException $e) {

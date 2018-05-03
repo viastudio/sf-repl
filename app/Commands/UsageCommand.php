@@ -1,10 +1,11 @@
 <?php
 namespace App\Commands;
 
-class UsageCommand {
-    const HELP_TEXT = "u [field] - Display Salesforce API usage information (limited to 'field', if specified)";
+class UsageCommand extends AbstractCommand {
+    protected $helpText = "u [field] - Display Salesforce API usage information (limited to 'field', if specified)";
+    protected $titleText = 'Usage';
 
-    public static function aliases() {
+    public function aliases() {
         return [
             'u',
             'usage'
@@ -15,7 +16,7 @@ class UsageCommand {
         $this->api = $api;
     }
 
-    public static function run($fields = null) {
+    public function run($fields = null, $parent = null) {
         $type = count($fields) > 1 ? $fields[1] : '';
 
         return json_encode($api->usage($type), JSON_PRETTY_PRINT);

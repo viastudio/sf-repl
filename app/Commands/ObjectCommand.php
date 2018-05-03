@@ -1,10 +1,11 @@
 <?php
 namespace App\Commands;
 
-class ObjectCommand {
-    const HELP_TEXT = 'Display the details of a Salesforce object';
+class ObjectCommand extends AbstractCommand {
+    protected $helpText = 'o [object] - Display the details of a Salesforce object';
+    protected $titleText = 'Object';
 
-    public static function aliases() {
+    public function aliases() {
         return [
             'o',
             'object',
@@ -15,7 +16,7 @@ class ObjectCommand {
         $this->api = $api;
     }
 
-    public static function run($fields = null) {
+    public function run($fields = null, $parent = null) {
         //
     }
 }
