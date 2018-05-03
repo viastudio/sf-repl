@@ -19,6 +19,6 @@ class UsageCommand extends AbstractCommand {
     public function run($fields = null, $parent = null) {
         $type = count($fields) > 0 ? $fields[0] : '';
 
-        return json_encode($this->api->usage($type), JSON_PRETTY_PRINT);
+        return $this->api->usage($type);
     }
 }
