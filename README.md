@@ -58,6 +58,8 @@ Running a command like `o all` will return *all* of the data about all sobjects.
 
 For example, `o all | jq '.sobjects | .[] | {label: .label}'` will display only the label of those sobject.
 
+You could also filter the `u` command to only display daily api request limits with a command like `u DailyApiRequests | jq '[{Max: .Max, Remaining: .Remaining}]'`
+
 
 ## Developer Notes
 
