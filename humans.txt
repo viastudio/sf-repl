@@ -1,0 +1,12 @@
+/* TEAM */
+Developer: Mark Biek
+Contact: mark@viastudio.com
+Twitter: @antelopelovefan
+From: Louisville, Kentucky, USA
+
+/* THANKS */
+Laravel
+URL: https://laravel.com/
+
+Guzzle HTTP Client
+URL: https://github.com/guzzle/guzzle
