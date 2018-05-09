@@ -12,7 +12,7 @@ class repl extends Command {
      *
      * @var string
      */
-    protected $signature = 'repl {--config=} {profile}';
+    protected $signature = 'repl {--config=} {--e|exec=} {profile}';
 
     /**
      * The console command description.
@@ -212,6 +212,47 @@ class repl extends Command {
         return in_array($line, $exits) || $line === false;
     }
 
+    private function processCommand($line) {
+        //Otherwise add the line to the history
+        readline_add_history($line);
+
+        //Parse the command out into pieces
+        $ret = $this->parseCommand($line);
+
+        //Make sure it's a valid command
+        if (!$this->commandExists($ret['command'])) {
+            throw new \Exception("Command '{$ret['command']}' not found");
+        }
+
+        //If it's valid, instantiate the command object
+        $cmd = new $this->commandMap[$ret['command']]($this->api);
+
+        //And run the command
+        $resp = $cmd->run($ret['fields'], $this);
+
+        if (isset($ret['pipe'])) {
+            //If there's a pipe command, execute that
+            $json = json_encode($resp);
+
+            //There can be issues directly outputting large json blos with echo and piping them to whatever command
+            //So we write the json payload to a temp file and cat it to the pipe command
+            $temp = tempnam('/tmp', 'sfr_');
+            file_put_contents($temp, $json);
+
+            $cmd = "cat $temp {$ret['pipe']}";
+            $json = shell_exec($cmd);
+
+            unlink($temp);
+        } else {
+            //If there's no pipe command, just print the formatted json
+            $json = json_encode($resp, JSON_PRETTY_PRINT);
+        }
+
+        if (!empty($json)) {
+            $this->line($json);
+        }
+    }
+
     /**
      * The main repl loop
      * @throws \Exception
@@ -240,48 +281,19 @@ class repl extends Command {
                     continue;
                 }
 
-                //Otherwise add the line to the history
-                readline_add_history($line);
-
-                //Parse the command out into pieces
-                $ret = $this->parseCommand($line);
-
-                //Make sure it's a valid command
-                if (!$this->commandExists($ret['command'])) {
-                    throw new \Exception("Command '{$ret['command']}' not found");
-                }
-
-                //If it's valid, instantiate the command object
-                $cmd = new $this->commandMap[$ret['command']]($this->api);
-
-                //And run the command
-                $resp = $cmd->run($ret['fields'], $this);
-
-                if (isset($ret['pipe'])) {
-                    //If there's a pipe command, execute that
-                    $json = json_encode($resp);
-
-                    //There can be issues directly outputting large json blos with echo and piping them to whatever command
-                    //So we write the json payload to a temp file and cat it to the pipe command
-                    $temp = tempnam('/tmp', 'sfr_');
-                    file_put_contents($temp, $json);
-
-                    $cmd = "cat $temp {$ret['pipe']}";
-                    $json = shell_exec($cmd);
-
-                    unlink($temp);
-                } else {
-                    //If there's no pipe command, just print the formatted json
-                    $json = json_encode($resp, JSON_PRETTY_PRINT);
-                }
-
-                if (!empty($json)) {
-                    $this->line($json);
-                }
+                $this->processCommand($line);
             } catch (\Exception $e) {
                 $this->error($e->getMessage());
             }
         }
+    }
+
+    public function exec($line) {
+        if (empty($line)) {
+            return;
+        }
+
+        $this->processCommand($line);
     }
 
     /**
@@ -295,7 +307,11 @@ class repl extends Command {
             $this->initSalesforceApi();
             $this->readHistory();
 
-            $this->repl();
+            if ($this->option('exec')) {
+                $this->exec($this->option('exec'));
+            } else {
+                $this->repl();
+            }
         } catch (\App\Exceptions\InvalidConfigException $e) {
             $this->error($e->getMessage());
         } catch (\Exception $e) {
