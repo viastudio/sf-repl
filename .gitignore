@@ -13,4 +13,4 @@ yarn-error.log
 .env
 *.ini
 !sample.config.ini
-.history
+.history*
