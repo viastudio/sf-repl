@@ -60,6 +60,11 @@ For example, `o all | jq '.sobjects | .[] | {label: .label}'` will display only 
 
 You could also filter the `u` command to only display daily api request limits with a command like `u DailyApiRequests | jq '[{Max: .Max, Remaining: .Remaining}]'`
 
+### Single Commands
+You can specify a single command with the `--exec` argument.
+
+For example: `php artisan repl fcgs --exec="u DailyApiRequests | jq '[{Max: .Max, Remaining: .Remaining}]'"
+
 
 ## Developer Notes
 
