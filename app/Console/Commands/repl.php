@@ -191,6 +191,7 @@ class repl extends Command {
             'salesforce_consumer_key' => $this->salesforce_consumer_key,
             'salesforce_consumer_secret' => $this->salesforce_consumer_secret,
             'salesforce_security_token' => $this->salesforce_security_token,
+            'sandbox' => $this->sandbox ?? false,
         ];
     }
 

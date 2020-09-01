@@ -124,7 +124,9 @@ class Salesforce {
             'password' => $salesforcePass
         ];
 
-        $resp = $this->client->request('POST', 'https://login.salesforce.com/services/oauth2/token', [
+        $authUrl = $this->getenv('sandbox') ? 'https://test.salesforce.com' : 'https://login.salesforce.com';
+
+        $resp = $this->client->request('POST', "$authUrl/services/oauth2/token", [
                 'form_params' => $params
                 ]);
 
